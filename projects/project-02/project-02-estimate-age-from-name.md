@@ -174,7 +174,7 @@ tbl_lifetables |>
   geom_step() +
   # Add labels (title, subtitle, x, y, caption)
   labs(
-    title = "The Survival Curve for a Person to be Alive In 2022",
+    title = "The Survival Curve For A Person To Be Alive In 2022",
     subtitle = "Based On The Year They Were Born",
     x = "Year",
     y = "Probability of Being Alive",
@@ -264,10 +264,10 @@ tbl_lifetables_extended_2022 <- tbl_lifetables_extended |>
   ) +
   # Add labels (title, subtitle, x, y, caption)
   labs(
-    title = "The Probability That a Person has Survived Till 2022",
+    title = "The Probability That A Person Has Survived Till 2022",
     subtitle = "",
     x = "Year",
-    y = "Probability of being alive",
+    y = "Probability Of Being Alive",
     caption = "Source: SSA"
   )
 ```
@@ -523,7 +523,7 @@ tbl_names_extended_age |>
   geom_point(size = 2, color = "darkblue") +
   # Add labels (title, subtitle, x, y)
   labs(
-    title = "Age Distribution for People with Different Names.",
+    title = "Age Distribution for People With Different Names.",
     subtitle = "The Average Age for Female Names",
     x = "Age",
     y = "Names"
