@@ -21,9 +21,9 @@ results, since we now have 7 years worth of additional data.
 Let us start by reading in the baby names data from `data/names.csv.gz`.
 
 ``` r
-# Load the tidyverse package and install zoo package
+# Load the tidyverse package
 library(tidyverse)
-library(zoo)
+
 
 # Read data/names.csv.gz into a data frame named `tbl_names`
 
@@ -254,7 +254,7 @@ tbl_lifetables_extended_2022 <- tbl_lifetables_extended |>
   filter(year + age == 2022)
   tbl_lifetables_extended_2022 |> 
   # Initialize a ggplot of year vs. probability of being alive (lx/10^5)
-  ggplot(aes(x = year, y = (lx/10^5))) +
+  ggplot(aes(x = year, y = (lx/10^5), color = sex)) +
   # Add a line layer
   geom_line() +
   # Add a step layer for the non-imputed data

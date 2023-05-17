@@ -4,8 +4,7 @@ output: github_document
 
 ```{r setup, message = FALSE, include = FALSE}
 library(tidyverse)
-install.packages("zoo")
-install.packages("janitor")
+
 knitr::opts_chunk$set(
   echo = TRUE,
   error = TRUE,
@@ -40,9 +39,9 @@ So, what more is in a name? Believe it or not, it is possible to predict the age
 Let us start by reading in the baby names data from `data/names.csv.gz`.
 
 ```{r tbl-names, message=FALSE}
-# Load the tidyverse package and install zoo package
+# Load the tidyverse package
 library(tidyverse)
-library(zoo)
+
 
 # Read data/names.csv.gz into a data frame named `tbl_names`
 
@@ -192,7 +191,7 @@ tbl_lifetables_extended_2022 <- tbl_lifetables_extended |>
   filter(year + age == 2022)
   tbl_lifetables_extended_2022 |> 
   # Initialize a ggplot of year vs. probability of being alive (lx/10^5)
-  ggplot(aes(x = year, y = (lx/10^5))) +
+  ggplot(aes(x = year, y = (lx/10^5), color = sex)) +
   # Add a line layer
   geom_line() +
   # Add a step layer for the non-imputed data
