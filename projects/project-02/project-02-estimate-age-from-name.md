@@ -3,13 +3,14 @@
 
 ![shakespeare-whats-in-a-name](https://miro.medium.com/v2/resize:fit:800/1*Prp8tivsOP54c-bPTpxj5A.png)
 
-So, what more is in a name? Well, with some further work, it is possible
-to predict the age of a person based on the name (Whoa! Really????). The
-popular FiveThirtyEight published a [blog
+So, what more is in a name? Believe it or not, it is possible to predict
+the age of a person based on their name (Whoa! Really????). In fact,
+FiveThirtyEight, a popular website that focuses on data-driven
+journalism, published a [blog
 post](https://fivethirtyeight.com/features/how-to-tell-someones-age-when-all-you-know-is-her-name/)
-on this in 2014. Would it not be fun to try and replicate the results?
-Actually, we are going to do more than just replicate the results, since
-we now have 7 years worth of additional data.
+on this in 2014. Wouldn’t it be exciting to try and replicate their
+findings? Actually, we are going to do more than just replicate their
+results, since we now have 7 years worth of additional data.
 
 ![estimate-age-from-name](https://fivethirtyeight.com/wp-content/uploads/2014/05/silver-feature-most-common-women-names3.png)
 
@@ -17,17 +18,37 @@ we now have 7 years worth of additional data.
 
 #### Names
 
-Let us start by reading in the babynames data from `data/names.csv.gz`.
+Let us start by reading in the baby names data from `data/names.csv.gz`.
 
 ``` r
-# Load the tidyverse package
-
+# Load the tidyverse package and install zoo package
+library(tidyverse)
+library(zoo)
 
 # Read data/names.csv.gz into a data frame named `tbl_names`
 
-
+file_name_names <- here::here("data/names.csv.gz")
+tbl_names <- readr::read_csv(
+  file = file_name_names, 
+  show_col_types = FALSE
+)
 
 # Print tbl_names
+tbl_names
+#> # A tibble: 2,052,781 × 4
+#>     year name      sex   nb_births
+#>    <dbl> <chr>     <chr>     <dbl>
+#>  1  1880 Mary      F          7065
+#>  2  1880 Anna      F          2604
+#>  3  1880 Emma      F          2003
+#>  4  1880 Elizabeth F          1939
+#>  5  1880 Minnie    F          1746
+#>  6  1880 Margaret  F          1578
+#>  7  1880 Ida       F          1472
+#>  8  1880 Alice     F          1414
+#>  9  1880 Bertha    F          1320
+#> 10  1880 Sarah     F          1288
+#> # ℹ 2,052,771 more rows
 ```
 
 #### Lifetables
@@ -114,9 +135,28 @@ We already ran the code above and saved the data as
 
 ``` r
 # Read data/lifetables.csv.gz into a data frame named `tbl_lifetables`
-
+  file_life_tables <- here::here("data/lifetables.csv.gz")
+tbl_lifetables <- readr::read_csv(
+  file = file_life_tables, 
+  show_col_types = FALSE
+)
 
 # Print `tbl_lifetables`
+tbl_lifetables
+#> # A tibble: 5,040 × 9
+#>     year sex     age      qx     lx    dx    Lx      Tx    ex
+#>    <dbl> <chr> <dbl>   <dbl>  <dbl> <dbl> <dbl>   <dbl> <dbl>
+#>  1  1900 M         0 0.146   100000 14596 90026 4640595  46.4
+#>  2  1900 M         1 0.0381   85404  3257 83776 4550569  53.3
+#>  3  1900 M         2 0.0196   82147  1608 81343 4466793  54.4
+#>  4  1900 M         3 0.0135   80539  1090 79994 4385450  54.4
+#>  5  1900 M         4 0.0108   79449   858 79020 4305456  54.2
+#>  6  1900 M         5 0.00794  78591   624 78279 4226436  53.8
+#>  7  1900 M         6 0.0057   77967   444 77745 4148156  53.2
+#>  8  1900 M         7 0.00407  77523   316 77365 4070411  52.5
+#>  9  1900 M         8 0.00305  77207   235 77090 3993046  51.7
+#> 10  1900 M         9 0.00256  76972   197 76874 3915956  50.9
+#> # ℹ 5,030 more rows
 ```
 
 It is always a good idea to plot the data to understand it better. Given
@@ -127,22 +167,24 @@ were born.
 ``` r
 tbl_lifetables |> 
   # Filter for rows where age and year sum up to 2022
-  filter(___ + ___ == ___) |> 
+  filter(age + year == 2022) |> 
   # Initialize a ggplot of year vs. probability of being alive (lx/10^5)
-  ___(___(x = ___, y = ___, color = ___)) +
+  ggplot(aes(x = year, y = (lx/10^5), color = sex)) +
   # Add a step layer
   geom_step() +
   # Add labels (title, subtitle, x, y, caption)
   labs(
-    title = ""___"",
-    subtitle = ""___"",
-    x = "___",
-    y = ""___"",
-    caption = ""Source: ___""
+    title = "The Survival Curve for a Person to be Alive In 2022",
+    subtitle = "Based On The Year They Were Born",
+    x = "Year",
+    y = "Probability of Being Alive",
+    caption = "Source: SSA"
   ) +
   # Update theme to move plot title
   theme(plot.title.position = 'plot')
 ```
+
+<img src="img/plot-lifetables-1.png" width="100%" style="display: block; margin: auto;" />
 
 Looking at the plot, we gather that a male born in 1950 has almost a 50%
 chance of being alive in 2022. Notice that `tbl_lifetable` only has
@@ -172,11 +214,12 @@ interpolation. We will `ungroup` the data at the end as the grouping is
 no longer necessary.
 
 ``` r
+
 tbl_lifetables_extended <- tbl_lifetables |> 
   # Select the columns sex, age, year, and lx
-  
+  select(sex, age, year, lx) |>
   # Group by sex and age
-  
+  group_by(sex, age) |>
   # Complete the sequence of years
   complete(year = full_seq(year, period = 1)) |> 
   # Add a NEW boolean column to indicate if the data is imputed
@@ -187,6 +230,20 @@ tbl_lifetables_extended <- tbl_lifetables |>
   ungroup()
 
 tbl_lifetables_extended
+#> # A tibble: 48,240 × 5
+#>    sex     age  year     lx is_imputed
+#>    <chr> <dbl> <dbl>  <dbl> <lgl>     
+#>  1 F         0  1900 100000 FALSE     
+#>  2 F         0  1901 100000 TRUE      
+#>  3 F         0  1902 100000 TRUE      
+#>  4 F         0  1903 100000 TRUE      
+#>  5 F         0  1904 100000 TRUE      
+#>  6 F         0  1905 100000 TRUE      
+#>  7 F         0  1906 100000 TRUE      
+#>  8 F         0  1907 100000 TRUE      
+#>  9 F         0  1908 100000 TRUE      
+#> 10 F         0  1909 100000 TRUE      
+#> # ℹ 48,230 more rows
 ```
 
 We can get the probability that a person has survived till 2022 by
@@ -195,19 +252,29 @@ filtering `tbl_lifetables_extended` for rows where `year + age = 2022`.
 ``` r
 tbl_lifetables_extended_2022 <- tbl_lifetables_extended |> 
   filter(year + age == 2022)
-
-tbl_lifetables_extended_2022 |> 
+  tbl_lifetables_extended_2022 |> 
   # Initialize a ggplot of year vs. probability of being alive (lx/10^5)
-  
+  ggplot(aes(x = year, y = (lx/10^5))) +
   # Add a line layer
- 
+  geom_line() +
   # Add a step layer for the non-imputed data
   geom_step(
     data = function(d) filter(d, !is_imputed),
     linetype = 'dashed'
   ) +
   # Add labels (title, subtitle, x, y, caption)
+  labs(
+    title = "The Probability That a Person has Survived Till 2022",
+    subtitle = "",
+    x = "Year",
+    y = "Probability of being alive",
+    caption = "Source: SSA"
+  )
+```
 
+<img src="img/plot-lifetables-extended-1.png" width="100%" style="display: block; margin: auto;" />
+
+``` r
   
   
   
@@ -216,6 +283,11 @@ tbl_lifetables_extended_2022 |>
   
   # Update theme to move plot title
   theme(plot.title.position = 'plot')
+#> List of 1
+#>  $ plot.title.position: chr "plot"
+#>  - attr(*, "class")= chr [1:2] "theme" "gg"
+#>  - attr(*, "complete")= logi FALSE
+#>  - attr(*, "validate")= logi TRUE
 ```
 
 Note how imputing the data provides more realistic estimates of the
@@ -231,17 +303,31 @@ that year.
 ``` r
 tbl_names_extended <- tbl_names |> 
   # Left join with `tbl_lifetables_extended_2022` by `sex` and `year`.
-  ___(___, by = c("___", "___")) |> 
+  left_join(tbl_lifetables_extended_2022, by = c("sex", "year")) |> 
   # Remove any NAs in the age column
   filter(!is.na(age)) |> 
   # Add NEW column p_alive (= lx / 10^5) for probability of being alive
-  ___(___ = ___ / ___) |> 
+  mutate(p_alive = (lx / 10^5)) |> 
   # Remove the column `lx`
   select(!lx) |> 
   # Add NEW column nb_alive (= p_alive * nb_births) for number of people alive 
-  ___(___ = ___ * ___)
+  mutate(nb_alive = p_alive * nb_births)
 
 tbl_names_extended
+#> # A tibble: 1,990,272 × 8
+#>     year name      sex   nb_births   age is_imputed p_alive nb_alive
+#>    <dbl> <chr>     <chr>     <dbl> <dbl> <lgl>        <dbl>    <dbl>
+#>  1  1903 Mary      F         14275   119 TRUE             0        0
+#>  2  1903 Helen     F          6129   119 TRUE             0        0
+#>  3  1903 Anna      F          5098   119 TRUE             0        0
+#>  4  1903 Margaret  F          5046   119 TRUE             0        0
+#>  5  1903 Ruth      F          4517   119 TRUE             0        0
+#>  6  1903 Elizabeth F          3724   119 TRUE             0        0
+#>  7  1903 Marie     F          3469   119 TRUE             0        0
+#>  8  1903 Florence  F          3468   119 TRUE             0        0
+#>  9  1903 Ethel     F          3257   119 TRUE             0        0
+#> 10  1903 Mildred   F          3088   119 TRUE             0        0
+#> # ℹ 1,990,262 more rows
 ```
 
 ### Model Data
@@ -274,9 +360,13 @@ estimate_age_stats <- function(tbl) {
 
 tbl_names_extended |> 
   # Filter for Gertrude/F
-  dplyr::filter(name == "___", sex == "___") |>
+  dplyr::filter(name == "Gertrude", sex == "F") |>
   # Estimate age stats
   estimate_age_stats()
+#> # A tibble: 1 × 7
+#>   `  0%` ` 25%` ` 50%` ` 75%` `100%` p_alive age_median
+#>    <dbl>  <dbl>  <dbl>  <dbl>  <dbl>   <dbl>      <dbl>
+#> 1      1     63     72     79    106  0.0659       68.2
 ```
 
 Let us write another function that plots the age distribution for a
@@ -287,15 +377,15 @@ visualize the age distribution for people with different names.
 plot_estimated_age <- function(tbl, my_name, my_sex) {
   tbl |> 
     # Filter to keep only rows with `my_name` and `my_sex`
-    filter(name == ___, sex == ___) |> 
+    filter(name == my_name, sex == my_sex) |> 
     # Add a column `age_median` with the weighted mean of age and nb_alive
     mutate(age_median = weighted.mean(age, nb_alive)) |> 
     # Initialize a ggplot with x = year
-
+    ggplot(aes(x = year)) +
     # Add a column layer with y = nb_alive, and appropriate colors
-    
+    geom_col(aes(y = nb_alive), color = "blue") +
     # Add a line layer with y = nb_births, and appropriate colors
-    
+    geom_line(aes(y = nb_births), color = "gray") +
     # Add a vertical line for the median age
     geom_vline(
       aes(xintercept = 2022 - age_median), 
@@ -305,9 +395,9 @@ plot_estimated_age <- function(tbl, my_name, my_sex) {
     # Add labels (title, subtitle, x, y)
     labs(
       title = glue::glue('Age Distribution of American Girls Named {my_name}'),
-      subtitle = "___",
-      x = "___"
-      y = "___"
+      subtitle = "",
+      x = "Year",
+      y = "Number of Births"
     ) +
     # Add an annotation for number of people estimated to be alive
     annotate(
@@ -337,25 +427,42 @@ tbl_names_extended |>
   plot_estimated_age("Anna", "F")
 ```
 
+<img src="img/plot-estimated-age-1.png" width="100%" style="display: block; margin: auto;" />
+
 Let us now get the top 25 most popular names for Females.
 
 ``` r
 # Create `tbl_names_female_top_25` with name and sex for top 25 females
 tbl_names_female_top_25 <- tbl_names |>
   # Group by sex and name
-  
+  group_by(sex, name) |>
   # Summarize total number of births
-  
+  summarize(total_nb_births = sum(nb_births), .groups = "drop") |>
   # Remove column nb_births
-  
+  mutate(nb_births = NULL) |>
   # Filter only Females
-
+  filter(sex == "F") |>
   # Slice top 25 rows
-  
+  slice_max(total_nb_births, n = 25) |>
   # Select name and sex
-  
+  select(name, sex)
 
 # Print `tbl_names_female_top_25`
+tbl_names_female_top_25
+#> # A tibble: 25 × 2
+#>    name      sex  
+#>    <chr>     <chr>
+#>  1 Mary      F    
+#>  2 Elizabeth F    
+#>  3 Patricia  F    
+#>  4 Jennifer  F    
+#>  5 Linda     F    
+#>  6 Barbara   F    
+#>  7 Margaret  F    
+#>  8 Susan     F    
+#>  9 Dorothy   F    
+#> 10 Sarah     F    
+#> # ℹ 15 more rows
 ```
 
 Let us join `tbl_names_extended` with `tbl_names_female_top_25` so that
@@ -364,17 +471,32 @@ we only keep rows corresponding to the top 25 female names.
 ``` r
 tbl_names_extended_age <- tbl_names_extended |> 
   # Inner join the `tbl_names_female_top_25` table by `sex` and `name`
-  
+  inner_join(tbl_names_female_top_25, by = c("sex", "name")) |>
   # Group by name and sex
-   
+  group_by(name, sex) |>
   # Estimate age stats
   estimate_age_stats() |> 
   # Arrange the data based on median age
-   
+  arrange(desc(age_median)) |>
   # Clean the names
   janitor::clean_names()
 
 tbl_names_extended_age
+#> # A tibble: 25 × 9
+#>    name     sex   x0_percent x25_percent x50_percent x75_percent x100_percent
+#>    <chr>    <chr>      <dbl>       <dbl>       <dbl>       <dbl>        <dbl>
+#>  1 Betty    F              1          63          71          77         104.
+#>  2 Carol    F              1          60          67          74         104.
+#>  3 Barbara  F              1          60          68          74         104.
+#>  4 Linda    F              1          61          68          73         104.
+#>  5 Dorothy  F              1          59          69          76         106.
+#>  6 Patricia F              1          56          65          72         105.
+#>  7 Donna    F              1          57          63          69         103.
+#>  8 Nancy    F              1          57          65          71         104.
+#>  9 Susan    F              1          56          63          69         105.
+#> 10 Sandra   F              1          55          63          71         101.
+#> # ℹ 15 more rows
+#> # ℹ 2 more variables: p_alive <dbl>, age_median <dbl>
 ```
 
 We can now replicate the plot published by FiveThirtyEight by adding a
@@ -386,25 +508,25 @@ tbl_names_extended_age |>
   # Reorder name based on descending median age 
   mutate(name = fct_reorder(name, desc(age_median))) |> 
   # Initialize a ggplot of age_median vs. name
-  
+  ggplot(aes(x = age_median, y = name)) +
   # Add a segment layer: x = x25_percent, xend = x75_percent and y_end = name
   geom_segment(
     aes(
-      x = ___,
-      xend = ___, 
-      yend = ___
+      x = x25_percent,
+      xend = x75_percent, 
+      yend = name
     ),
-    color = ""___"",
+    color = "red",
     linewidth = 5
   ) +
   # Add a point layer:
-  geom_point(size = 2, color = ""___"") +
+  geom_point(size = 2, color = "darkblue") +
   # Add labels (title, subtitle, x, y)
   labs(
-    title = "___",
-    subtitle = "___",
-    x = "___",
-    y = "___"
+    title = "Age Distribution for People with Different Names.",
+    subtitle = "The Average Age for Female Names",
+    x = "Age",
+    y = "Names"
   ) +
   # Update theme to clean up visual appearance of the plot
   theme(
@@ -416,3 +538,5 @@ tbl_names_extended_age |>
     panel.background = element_rect(fill = '#f0f0f0')
   )
 ```
+
+<img src="img/plot-tbl-names-extended-age-1.png" width="100%" style="display: block; margin: auto;" />
