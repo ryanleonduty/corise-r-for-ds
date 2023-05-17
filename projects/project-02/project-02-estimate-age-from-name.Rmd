@@ -165,6 +165,12 @@ We can extend the lifetables this by using three useful functions:
 
 Given that we want to interpolate for all combinations of `sex` and `age`, we first need to group by `sex` and `age`, then use `complete` and `full_seq` to add the missing combinations, and finally `zoo::na.approx` to interpolate the `NA` values using cubic interpolation. We will `ungroup` the data at the end as the grouping is no longer necessary.
 
+```{r}
+# Install zoo package 
+install.packages("zoo")
+```
+
+
 ```{r tbl-lifetables-extended}
 
 tbl_lifetables_extended <- tbl_lifetables |> 
@@ -207,12 +213,6 @@ tbl_lifetables_extended_2022 <- tbl_lifetables_extended |>
     y = "Probability Of Being Alive",
     caption = "Source: SSA"
   )
-  
-  
-  
-  
-  
-  
   # Update theme to move plot title
   theme(plot.title.position = 'plot')
 ```
@@ -348,6 +348,12 @@ tbl_names_female_top_25
 ```
 
 Let us join `tbl_names_extended` with `tbl_names_female_top_25` so that we only keep rows corresponding to the top 25 female names.
+
+```{r}
+# Intall janitor package
+install.packages("janitor")
+```
+
 
 ```{r tbl-names-extended-age}
 tbl_names_extended_age <- tbl_names_extended |> 

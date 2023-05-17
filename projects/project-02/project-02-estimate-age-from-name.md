@@ -214,6 +214,13 @@ interpolation. We will `ungroup` the data at the end as the grouping is
 no longer necessary.
 
 ``` r
+# Install zoo package 
+install.packages("zoo")
+#> Installing package into '/home/gitpod/libs'
+#> (as 'lib' is unspecified)
+```
+
+``` r
 
 tbl_lifetables_extended <- tbl_lifetables |> 
   # Select the columns sex, age, year, and lx
@@ -275,12 +282,6 @@ tbl_lifetables_extended_2022 <- tbl_lifetables_extended |>
 <img src="img/plot-lifetables-extended-1.png" width="100%" style="display: block; margin: auto;" />
 
 ``` r
-  
-  
-  
-  
-  
-  
   # Update theme to move plot title
   theme(plot.title.position = 'plot')
 #> List of 1
@@ -467,6 +468,13 @@ tbl_names_female_top_25
 
 Let us join `tbl_names_extended` with `tbl_names_female_top_25` so that
 we only keep rows corresponding to the top 25 female names.
+
+``` r
+# Intall janitor package
+install.packages("janitor")
+#> Installing package into '/home/gitpod/libs'
+#> (as 'lib' is unspecified)
+```
 
 ``` r
 tbl_names_extended_age <- tbl_names_extended |> 
